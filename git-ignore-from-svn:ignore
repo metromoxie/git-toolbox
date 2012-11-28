@@ -1,0 +1,60 @@
+#! /usr/bin/env python
+#
+#    Copyright 2012 Joel Weinberger
+#
+#    This program is free software: you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by the Free
+#    Software Foundation, either version 3 of the License, or (at your option)
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful, but WITHOUT
+#    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+#    more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# If for some reason you're not using git-svn, and you need to convert an svn
+# repo's svn:ignore properties to a .gitignore file, this may be of use to you.
+#
+# To do the conversion, utter the following from the top level svn directory:
+#     svn propget svn:ignore -R | git-ignore-from-svn:ignore
+# This will write the files to ignore to standard out. You will probably want to
+# redirect that to a .gitignore file or something similar.
+#
+# Note one VERY LARGE CAVEAT in this script: If any of the files that are
+# ignored contain " - " (that is, a blank followed by a dash followed by a
+# blank), this script will NOT work. This is a limitation because that is the
+# delimeter used by svn propget -R to separate a directory from the files it is
+# ignoring. Someone who cares more could fix this problem.
+
+import sys
+import re
+
+def main():
+  '''
+  Main.
+  '''
+
+  lastdir = ""
+  ignorelines = sys.stdin.readlines()
+
+  for line in ignorelines:
+    if line == "\n":
+      continue
+
+    ignorefile = line
+
+    m = re.search('(.*) - (.*)', line)
+    if m:
+      lastdir = m.group(1)
+      ignorefile = m.group(2) + "\n"
+
+    sys.stdout.write(lastdir + "/" + ignorefile)
+
+  return 0
+
+if __name__ == '__main__':
+  sys.exit(main())
+
